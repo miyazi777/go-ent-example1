@@ -136,10 +136,73 @@ func addUserAndComment() {
 	db.CloseDB(client)
 }
 
+// トランザクションを開始してコミットする
+func transaction1() {
+	client := db.NewDBClient()
+	ctx := context.Background()
+
+	// トランザクション開始
+	tx, err := client.Debug().Tx(ctx)
+	if err != nil {
+		fmt.Printf("failed creating transaction: %v", err)
+		return
+	}
+
+	// ユーザー1件追加
+	usr, err := tx.User.
+		Create().
+		SetName("user3").
+		SetAge(30).
+		Save(ctx)
+	if err != nil {
+		fmt.Printf("failed creating user: %v", err)
+		return
+	}
+	fmt.Printf("ID: %d Name: %s", usr.ID, usr.Name) // ID: x Name: user3
+
+	// コミット
+	tx.Commit()
+
+	db.CloseDB(client)
+}
+
+// トランザクションを開始するがロールバックする
+func transaction2() {
+	client := db.NewDBClient()
+	ctx := context.Background()
+
+	// トランザクション開始
+	tx, err := client.Debug().Tx(ctx)
+	if err != nil {
+		fmt.Printf("failed creating transaction: %v", err)
+		return
+	}
+
+	// ユーザー1件追加
+	usr, err := tx.User.
+		Create().
+		SetName("user4").
+		SetAge(30).
+		Save(ctx)
+	if err != nil {
+		fmt.Printf("failed creating user: %v", err)
+		return
+	}
+	fmt.Printf("ID: %d Name: %s", usr.ID, usr.Name) // ID: x Name: user4
+
+	// ロールバック
+	tx.Rollback()
+
+	db.CloseDB(client)
+}
+
 func main() {
 	cleanUp()
 
+	transaction1()
+	// transaction2()
+
 	// crud()
 
-	addUserAndComment()
+	// addUserAndComment()
 }
