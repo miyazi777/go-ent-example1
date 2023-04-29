@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"test/ent/comment"
 	"test/ent/schema"
 	"test/ent/user"
 )
@@ -11,6 +12,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	commentFields := schema.Comment{}.Fields()
+	_ = commentFields
+	// commentDescComment is the schema descriptor for comment field.
+	commentDescComment := commentFields[1].Descriptor()
+	// comment.DefaultComment holds the default value on creation for the comment field.
+	comment.DefaultComment = commentDescComment.Default.(string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescName is the schema descriptor for name field.
