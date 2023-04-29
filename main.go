@@ -115,7 +115,7 @@ func addUserAndComment() {
 	}
 
 	for _, comment := range comments {
-		fmt.Println(comment.Comment)
+		fmt.Println(comment.Comment) // comment1, comment2
 	}
 
 	// 'comment2'を持つユーザー一覧を取得
