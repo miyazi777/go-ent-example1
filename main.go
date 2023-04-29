@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func main() {
+func crud() {
 	client := db.NewDBClient()
 	ctx := context.Background()
 
@@ -53,4 +53,8 @@ func main() {
 
 	// DB接続を閉じる
 	db.CloseDB(client)
+}
+
+func main() {
+	crud()
 }
