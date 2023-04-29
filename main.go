@@ -55,6 +55,59 @@ func crud() {
 	db.CloseDB(client)
 }
 
+func addUserAndComment() {
+	client := db.NewDBClient()
+	ctx := context.Background()
+
+	// 1件追加
+	usr, err := client.Debug().User.
+		Create().
+		SetName("user2").
+		SetAge(30).
+		Save(ctx)
+	if err != nil {
+		fmt.Printf("failed creating user: %v", err)
+		return
+	}
+
+	// コメント1件追加
+	_, err = client.Debug().Comment.
+		Create().
+		SetUserID(usr.ID).
+		SetComment("comment1").
+		Save(ctx)
+	if err != nil {
+		fmt.Printf("failed creating comment: %v", err)
+		return
+	}
+
+	// コメント1件追加
+	_, err = client.Debug().Comment.
+		Create().
+		SetUserID(usr.ID).
+		SetComment("comment2").
+		Save(ctx)
+	if err != nil {
+		fmt.Printf("failed creating comment: %v", err)
+		return
+	}
+
+	// user2のコメントを全件取得
+	comments, err := usr.QueryComments().All(ctx)
+	if err != nil {
+		fmt.Printf("failed getting comments: %v", err)
+		return
+	}
+
+	for _, comment := range comments {
+		fmt.Println(comment.Comment)
+	}
+
+	db.CloseDB(client)
+}
+
 func main() {
-	crud()
+	// crud()
+
+	addUserAndComment()
 }
