@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"test/db"
+	"test/ent/comment"
 	"test/ent/user"
 
+	"entgo.io/ent/dialect/sql"
 	_ "github.com/lib/pq"
 )
 
@@ -52,6 +54,19 @@ func crud() {
 	}
 
 	// DB接続を閉じる
+	db.CloseDB(client)
+}
+
+func cleanUp() {
+	client := db.NewDBClient()
+	ctx := context.Background()
+
+	_, err := client.Debug().User.Delete().Exec(ctx)
+	if err != nil {
+		fmt.Printf("failed deleting user: %v", err)
+		return
+	}
+
 	db.CloseDB(client)
 }
 
@@ -103,10 +118,27 @@ func addUserAndComment() {
 		fmt.Println(comment.Comment)
 	}
 
+	// 'comment2'を持つユーザー一覧を取得
+	usrs, err := client.Debug().User.Query().Where(func(s *sql.Selector) {
+		t := sql.Table(comment.Table)
+		s.Join(t).On(s.C(user.FieldID), t.C(comment.FieldUserID))
+		s.Where(sql.EQ(t.C(comment.FieldComment), "comment2"))
+	}).All(ctx)
+	if err != nil {
+		fmt.Printf("failed getting users: %v", err)
+		return
+	}
+
+	for _, usr := range usrs {
+		fmt.Println(usr.Name)
+	}
+
 	db.CloseDB(client)
 }
 
 func main() {
+	cleanUp()
+
 	// crud()
 
 	addUserAndComment()
