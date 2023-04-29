@@ -130,7 +130,7 @@ func addUserAndComment() {
 	}
 
 	for _, usr := range usrs {
-		fmt.Println(usr.Name)
+		fmt.Println(usr.Name) // user2
 	}
 
 	db.CloseDB(client)
