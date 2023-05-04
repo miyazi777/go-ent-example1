@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"test/db"
+	"test/ent"
 	"test/ent/comment"
 	"test/ent/user"
 
@@ -196,10 +197,61 @@ func transaction2() {
 	db.CloseDB(client)
 }
 
+func withTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) error {
+	tx, err := client.Debug().Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := fn(tx); err != nil {
+		fmt.Printf("rollback transaction: %v", err)
+		tx.Rollback()
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		fmt.Printf("failed committing transaction: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// トランザクションを開始してコミットする
+func transaction1b() {
+	client := db.NewDBClient()
+	ctx := context.Background()
+
+	// トランザクション開始
+	err := withTx(ctx, client, func(tx *ent.Tx) error {
+		// ユーザー1件追加
+		usr, err := tx.User.
+			Create().
+			SetName("user3").
+			SetAge(30).
+			Save(ctx)
+		if err != nil {
+			fmt.Printf("failed creating user: %v", err)
+			return err
+		}
+		fmt.Printf("ID: %d Name: %s", usr.ID, usr.Name) // ID: x Name: user3
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("failed trasaction: %v", err)
+		return
+	}
+
+	db.CloseDB(client)
+}
+
 func main() {
 	cleanUp()
 
-	transaction1()
+	// transaction1()
+	transaction1b()
 	// transaction2()
 
 	// crud()
