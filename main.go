@@ -197,24 +197,25 @@ func transaction2() {
 	db.CloseDB(client)
 }
 
-func withTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) error) error {
+func withTx(ctx context.Context, client *ent.Client, fn func(tx *ent.Tx) (*ent.User, error)) (*ent.User, error) {
 	tx, err := client.Debug().Tx(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if err := fn(tx); err != nil {
+	var entity *ent.User
+	if entity, err = fn(tx); err != nil {
 		fmt.Printf("rollback transaction: %v", err)
 		tx.Rollback()
-		return err
+		return nil, err
 	}
 
 	if err := tx.Commit(); err != nil {
 		fmt.Printf("failed committing transaction: %v", err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return entity, nil
 }
 
 // トランザクションを開始してコミットする
@@ -223,21 +224,22 @@ func transaction1b() {
 	ctx := context.Background()
 
 	// トランザクション開始
-	err := withTx(ctx, client, func(tx *ent.Tx) error {
+	usr, err := withTx(ctx, client, func(tx *ent.Tx) (*ent.User, error) {
 		// ユーザー1件追加
 		usr, err := tx.User.
 			Create().
 			SetName("user3").
 			SetAge(30).
+			SetNickname("user3 nickname").
 			Save(ctx)
 		if err != nil {
 			fmt.Printf("failed creating user: %v", err)
-			return err
+			return nil, err
 		}
-		fmt.Printf("ID: %d Name: %s", usr.ID, usr.Name) // ID: x Name: user3
 
-		return nil
+		return usr, nil
 	})
+	fmt.Printf("ID: %d Name: %s", usr.ID, usr.Name) // ID: x Name: user3 NickName: user3 nickname
 
 	if err != nil {
 		fmt.Printf("failed trasaction: %v", err)
