@@ -12,10 +12,13 @@ func NewDBClient() *ent.Client {
 	host := "localhost"
 	dbName := "testdb"
 	url := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", user, password, host, port, dbName)
+	// options := []ent.Option{ent.Debug()}
 	client, err := ent.Open("postgres", url)
 	if err != nil {
 		fmt.Printf("failed connecting to postgres: %v", err)
 	}
+	// client = client.Debug()
+
 	return client
 }
 

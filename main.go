@@ -18,7 +18,7 @@ func crud() {
 	ctx := context.Background()
 
 	// 1件追加
-	usr, err := client.Debug().User.
+	usr, err := client.User.
 		Create().
 		SetName("user1").
 		SetAge(33).
@@ -29,7 +29,7 @@ func crud() {
 	}
 
 	// 1件更新
-	updatedUser, err := client.Debug().User.Update().Where(user.ID(usr.ID)).SetAge(29).Save(ctx)
+	updatedUser, err := client.User.Update().Where(user.ID(usr.ID)).SetAge(29).Save(ctx)
 	if err != nil {
 		fmt.Printf("failed updating user: %v", err)
 		return
@@ -48,7 +48,7 @@ func crud() {
 	}
 
 	// 1件削除
-	_, err = client.Debug().User.Delete().Where(user.Name("user1")).Exec(ctx)
+	_, err = client.User.Delete().Where(user.Name("user1")).Exec(ctx)
 	if err != nil {
 		fmt.Printf("failed deleting user: %v", err)
 		return
@@ -254,10 +254,10 @@ func main() {
 	cleanUp()
 
 	// transaction1()
-	transaction1b()
+	// transaction1b()
 	// transaction2()
 
-	// crud()
+	crud()
 
 	// addUserAndComment()
 }
